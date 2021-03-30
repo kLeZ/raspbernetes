@@ -3,10 +3,13 @@ set -euo pipefail
 
 docker_version="5:19.03.9~3-0~raspbian-buster"
 
-# add repo list
-curl -fsSL https://download.docker.com/linux/raspbian/gpg | apt-key add -
+# Get the Docker signing key for packages
+curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add -
+
+# Add the Docker official repos
+
 cat << EOF >> /etc/apt/sources.list.d/docker.list
-deb [arch=armhf] https://download.docker.com/linux/raspbian buster stable
+deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable
 EOF
 
 # update mirrors and install docker

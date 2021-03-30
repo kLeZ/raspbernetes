@@ -21,18 +21,22 @@ RPI_TIMEZONE     ?= Australia/Melbourne
 # Kubernetes configuration
 KUBE_NODE_TYPE    ?= master
 KUBE_MASTER_VIP   ?= 192.168.1.100
-KUBE_MASTER_IP_01 ?= 192.168.1.101
-KUBE_MASTER_IP_02 ?= 192.168.1.102
-KUBE_MASTER_IP_03 ?= 192.168.1.103
+KUBE_MASTER_IPS   ?= 192.168.1.101
+KUBE_MASTER_PRIO  ?= 50
 
 # Wifi details if required
 WIFI_SSID     ?=
 WIFI_PASSWORD ?=
 
 # Raspbian image configuration
-RASPBIAN_VERSION       = raspbian_lite-2020-02-14
-RASPBIAN_IMAGE_VERSION = 2020-02-13-raspbian-buster-lite
-RASPBIAN_URL           = https://downloads.raspberrypi.org/raspbian_lite/images/$(RASPBIAN_VERSION)/$(RASPBIAN_IMAGE_VERSION).zip
+#DISTRO_NAME			?= raspbian_lite
+#DISTRO_VERSION			?= raspbian_lite-2020-02-14
+#DISTRO_IMAGE_VERSION	?= 2020-02-13-raspbian-buster-lite
+DISTRO_NAME				?= raspios_lite_arm64
+DISTRO_VERSION			?= raspios_lite_arm64-2020-08-24
+DISTRO_IMAGE_VERSION	?= 2020-08-20-raspios-buster-arm64-lite
+
+DISTRO_URL				= https://downloads.raspberrypi.org/$(DISTRO_NAME)/images/$(DISTRO_VERSION)/$(DISTRO_IMAGE_VERSION).zip
 
 ##@ Build
 .PHONY: build
@@ -47,9 +51,8 @@ build: prepare format install-conf create-conf clean ## Build SD card with Kuber
 	echo "Kubernetes:"
 	echo "- Node Type: $(KUBE_NODE_TYPE)"
 	echo "- Control Plane Endpoint: $(KUBE_MASTER_VIP)"
-	echo "- Master IP 01: $(KUBE_MASTER_IP_01)"
-	echo "- Master IP 02: $(KUBE_MASTER_IP_02)"
-	echo "- Master IP 03: $(KUBE_MASTER_IP_03)"
+	echo "- Master Priority: $(KUBE_MASTER_PRIO)"
+	echo "- Master IPs: $(KUBE_MASTER_IPS)"
 
 ##@ Configuration Generation
 .PHONY: install-conf
@@ -76,10 +79,9 @@ bootstrap-conf: ## Add node custom configuration file to be sourced on boot
 	echo "export RPI_NETWORK_TYPE=$(RPI_NETWORK_TYPE)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export RPI_TIMEZONE=$(RPI_TIMEZONE)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_MASTER_VIP=$(KUBE_MASTER_VIP)" >> $(RPI_HOME)/bootstrap/rpi-env
+	echo "export KUBE_MASTER_PRIO=$(KUBE_MASTER_PRIO)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_NODE_TYPE=$(KUBE_NODE_TYPE)" >> $(RPI_HOME)/bootstrap/rpi-env
-	echo "export KUBE_MASTER_IP_01=$(KUBE_MASTER_IP_01)" >> $(RPI_HOME)/bootstrap/rpi-env
-	echo "export KUBE_MASTER_IP_02=$(KUBE_MASTER_IP_02)" >> $(RPI_HOME)/bootstrap/rpi-env
-	echo "export KUBE_MASTER_IP_03=$(KUBE_MASTER_IP_03)" >> $(RPI_HOME)/bootstrap/rpi-env
+	echo "export KUBE_MASTER_IPS=$(KUBE_MASTER_IPS)" >> $(RPI_HOME)/bootstrap/rpi-env
 
 .PHONY: dhcp-conf
 dhcp-conf: ## Add dhcp configuration to set a static IP and gateway
@@ -93,9 +95,9 @@ $(OUTPUT_PATH)/ssh/id_ed25519: ## Generate SSH keypair to use in cluster communi
 
 ##@ Download and SD Card management
 .PHONY: format
-format: $(OUTPUT_PATH)/$(RASPBIAN_IMAGE_VERSION).img unmount ## Format the SD card with Raspbian
-	echo "Formatting SD card with $(RASPBIAN_IMAGE_VERSION).img"
-	sudo dd bs=4M if=./$(OUTPUT_PATH)/$(RASPBIAN_IMAGE_VERSION).img of=$(MNT_DEVICE) status=progress conv=fsync
+format: $(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img unmount ## Format the SD card with Raspbian
+	echo "Formatting SD card with $(DISTRO_IMAGE_VERSION).img"
+	sudo dd bs=4M if=./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img of=$(MNT_DEVICE) status=progress conv=fsync
 
 .PHONY: mount
 mount: ## Mount the current SD device
@@ -118,11 +120,11 @@ wlan0: ## Install wpa_supplicant for auto network join
 .PHONY: eth0
 eth0: ## Nothing to do for eth0
 
-$(OUTPUT_PATH)/$(RASPBIAN_IMAGE_VERSION).img: ## Download Raspbian image and extract to current directory
-	echo "Downloading $(RASPBIAN_IMAGE_VERSION).img..."
-	wget $(RASPBIAN_URL) -P ./$(OUTPUT_PATH)/
-	unzip ./$(OUTPUT_PATH)/$(RASPBIAN_IMAGE_VERSION).zip -d ./$(OUTPUT_PATH)/
-	rm -f ./$(OUTPUT_PATH)/$(RASPBIAN_IMAGE_VERSION).zip
+$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img: ## Download Raspbian image and extract to current directory
+	echo "Downloading $(DISTRO_IMAGE_VERSION).img..."
+	wget $(DISTRO_URL) -P ./$(OUTPUT_PATH)/
+	unzip ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip -d ./$(OUTPUT_PATH)/
+	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip
 
 ##@ Misc
 .PHONY: help

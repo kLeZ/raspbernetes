@@ -7,21 +7,12 @@ echo "Installing keepalived ${keepalived_version}..."
 apt-get install -y --no-install-recommends "keepalived=${keepalived_version}"
 apt-mark hold keepalived
 
-# figure out a priority level based on IP
-if [[ "${RPI_IP}" == "${KUBE_MASTER_IP_01}" ]]; then
-  priority=150
-elif [[ "${RPI_IP}" == "${KUBE_MASTER_IP_02}" ]]; then
-  priority=100
-else
-  priority=50
-fi
-
 # generate configuration file
 cat << EOF > /etc/keepalived/keepalived.conf
 vrrp_instance VI_1 {
     interface ${RPI_NETWORK_TYPE}
     virtual_router_id 1
-    priority ${priority}
+    priority ${KUBE_MASTER_PRIO}
     advert_int 1
     nopreempt
     authentication {

@@ -7,6 +7,9 @@ apt-get update
 echo "Installing base packages..."
 apt-get install -y --no-install-recommends \
   apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg2 \
   software-properties-common \
   zip \
   jq \
