@@ -30,7 +30,7 @@ echo ${KUBE_MASTER_IPS} | awk -F'\n' \
 	'{ \
 		split($1, a, "[[:space:]]"); \
 		for (i in a) { \
-			printf "server kube-master-%02d %s:6443 check\n", i, a[i] \
+			printf "  server kube-master-%02d %s:6443 check\n", i, a[i] \
 		} \
 	}' >> /etc/haproxy/haproxy.cfg
 

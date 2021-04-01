@@ -23,18 +23,16 @@ KUBE_NODE_TYPE    ?= master
 KUBE_MASTER_VIP   ?= 192.168.1.100
 KUBE_MASTER_IPS   ?= 192.168.1.101
 KUBE_MASTER_PRIO  ?= 50
+KUBE_MASTER_NET   ?= flannel
 
 # Wifi details if required
 WIFI_SSID     ?=
 WIFI_PASSWORD ?=
 
 # Raspbian image configuration
-#DISTRO_NAME			?= raspbian_lite
-#DISTRO_VERSION			?= raspbian_lite-2020-02-14
-#DISTRO_IMAGE_VERSION	?= 2020-02-13-raspbian-buster-lite
-DISTRO_NAME				?= raspios_lite_arm64
-DISTRO_VERSION			?= raspios_lite_arm64-2020-08-24
-DISTRO_IMAGE_VERSION	?= 2020-08-20-raspios-buster-arm64-lite
+DISTRO_NAME             ?= raspbian_lite
+DISTRO_VERSION          ?= raspbian_lite-2020-02-14
+DISTRO_IMAGE_VERSION    ?= 2020-02-13-raspbian-buster-lite
 
 DISTRO_URL				= https://downloads.raspberrypi.org/$(DISTRO_NAME)/images/$(DISTRO_VERSION)/$(DISTRO_IMAGE_VERSION).zip
 
@@ -53,6 +51,7 @@ build: prepare format install-conf create-conf clean ## Build SD card with Kuber
 	echo "- Control Plane Endpoint: $(KUBE_MASTER_VIP)"
 	echo "- Master Priority: $(KUBE_MASTER_PRIO)"
 	echo "- Master IPs: $(KUBE_MASTER_IPS)"
+	echo "- Master Net Provider: $(KUBE_MASTER_NET)"
 
 ##@ Configuration Generation
 .PHONY: install-conf
@@ -82,6 +81,7 @@ bootstrap-conf: ## Add node custom configuration file to be sourced on boot
 	echo "export KUBE_MASTER_PRIO=$(KUBE_MASTER_PRIO)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_NODE_TYPE=$(KUBE_NODE_TYPE)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_MASTER_IPS=$(KUBE_MASTER_IPS)" >> $(RPI_HOME)/bootstrap/rpi-env
+	echo "export KUBE_MASTER_NET=$(KUBE_MASTER_NET)" >> $(RPI_HOME)/bootstrap/rpi-env
 
 .PHONY: dhcp-conf
 dhcp-conf: ## Add dhcp configuration to set a static IP and gateway
@@ -121,6 +121,7 @@ wlan0: ## Install wpa_supplicant for auto network join
 eth0: ## Nothing to do for eth0
 
 $(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img: ## Download Raspbian image and extract to current directory
+	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip
 	echo "Downloading $(DISTRO_IMAGE_VERSION).img..."
 	wget $(DISTRO_URL) -P ./$(OUTPUT_PATH)/
 	unzip ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip -d ./$(OUTPUT_PATH)/

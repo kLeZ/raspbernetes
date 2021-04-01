@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-flannel_version="v0.13.0"
-flannel_url="https://raw.githubusercontent.com/flannel-io/flannel/${flannel_version}/Documentation/kube-flannel.yml"
 pi_home="/home/pi"
 kube_finished="${pi_home}/kube-finished-booting"
 
@@ -121,8 +119,16 @@ init_master() {
     --skip-certificate-key-print \
     --ignore-preflight-errors=Mem
 
-  # setup flannel
-  kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f "${flannel_url}"
+  # setup network
+  if [ "${KUBE_MASTER_NET}" -eq "flannel" ]; then
+    flannel_version="v0.13.0"
+    flannel_url="https://raw.githubusercontent.com/flannel-io/flannel/${flannel_version}/Documentation/kube-flannel.yml"
+    kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f "${flannel_url}"
+  elif [ "${KUBE_MASTER_NET}" -eq "weave" ]; then
+    weave_version="$(kubectl --kubeconfig=/etc/kubernetes/admin.conf version | base64 | tr -d '\n')"
+    weave_url="https://cloud.weave.works/k8s/net?k8s-version=${weave_version}"
+    kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f "${weave_url}"
+  fi
 }
 
 existing_master() {
