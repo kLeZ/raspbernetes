@@ -120,11 +120,11 @@ init_master() {
     --ignore-preflight-errors=Mem
 
   # setup network
-  if [ "${KUBE_MASTER_NET}" -eq "flannel" ]; then
+  if [ "${KUBE_MASTER_NET}" == "flannel" ]; then
     flannel_version="v0.13.0"
     flannel_url="https://raw.githubusercontent.com/flannel-io/flannel/${flannel_version}/Documentation/kube-flannel.yml"
     kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f "${flannel_url}"
-  elif [ "${KUBE_MASTER_NET}" -eq "weave" ]; then
+  elif [ "${KUBE_MASTER_NET}" == "weave" ]; then
     weave_version="$(kubectl --kubeconfig=/etc/kubernetes/admin.conf version | base64 | tr -d '\n')"
     weave_url="https://cloud.weave.works/k8s/net?k8s-version=${weave_version}"
     kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f "${weave_url}"
