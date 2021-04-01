@@ -1,15 +1,17 @@
 #!/bin/bash
 set -euo pipefail
-
-docker_version="5:19.03.9~3-0~raspbian-buster"
+distro_name="$(. /etc/os-release; echo "$ID")"
+distro_code="$(lsb_release -cs)"
+distro_arch="$(dpkg --print-architecture)"
+docker_version="5:19.03.9~3-0~${distro_name}-${distro_code}"
 
 # Get the Docker signing key for packages
-curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | apt-key add -
+curl -fsSL https://download.docker.com/linux/${distro_name}/gpg | apt-key add -
 
 # Add the Docker official repos
 
 cat << EOF >> /etc/apt/sources.list.d/docker.list
-deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable
+deb [arch=${distro_arch}] https://download.docker.com/linux/${distro_name} ${distro_code} stable
 EOF
 
 # update mirrors and install docker
