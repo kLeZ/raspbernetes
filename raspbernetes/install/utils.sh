@@ -11,6 +11,7 @@ apt-get install -y --no-install-recommends \
   curl \
   gnupg2 \
   software-properties-common \
+  nfs-common \
   zip \
   jq \
   git \
