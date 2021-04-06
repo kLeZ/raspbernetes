@@ -89,6 +89,8 @@ dhcp-conf: ## Add dhcp configuration to set a static IP and gateway
 	echo "static ip_address=$(RPI_IP)/24" | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
 	echo "static routers=$(RPI_GATEWAY)" | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
 	echo "static domain_name_servers=$(RPI_DNS)" | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
+	echo 'allowinterfaces eth0 wlan0 lo' | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
+	echo 'denyinterfaces weave datapath docker* veth* vxlan*' | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
 
 $(OUTPUT_PATH)/ssh/id_ed25519: ## Generate SSH keypair to use in cluster communication
 	ssh-keygen -t ed25519 -b 4096 -C "pi@raspberry" -f ./$(OUTPUT_PATH)/ssh/id_ed25519 -q -N ""
