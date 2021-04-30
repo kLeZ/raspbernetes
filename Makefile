@@ -4,10 +4,11 @@ SHELL := /bin/bash -o pipefail
 .DEFAULT_GOAL := help
 
 # Default variables
-MNT_DEVICE ?= /dev/mmcblk0
-MNT_ROOT    = /mnt/raspbernetes/root
-MNT_BOOT    = /mnt/raspbernetes/boot
-RPI_HOME    = $(MNT_ROOT)/home/pi
+MNT_DEVICE             ?= /dev/mmcblk0
+MNT_DEVICE_PART_PREFIX ?= p
+MNT_ROOT                = /mnt/raspbernetes/root
+MNT_BOOT                = /mnt/raspbernetes/boot
+RPI_HOME                = $(MNT_ROOT)/home/pi
 OUTPUT_PATH = output
 
 # Raspberry PI host and IP configuration
@@ -103,13 +104,13 @@ format: $(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img unmount ## Format the SD card
 
 .PHONY: mount
 mount: ## Mount the current SD device
-	sudo mount $(MNT_DEVICE)p1 $(MNT_BOOT)
-	sudo mount $(MNT_DEVICE)p2 $(MNT_ROOT)
+	sudo mount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)1 $(MNT_BOOT)
+	sudo mount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)2 $(MNT_ROOT)
 
 .PHONY: unmount
 unmount: ## Unmount the current SD device
-	sudo umount $(MNT_DEVICE)p1 || true
-	sudo umount $(MNT_DEVICE)p2 || true
+	sudo umount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)1 || true
+	sudo umount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)2 || true
 
 .PHONY: wlan0
 wlan0: ## Install wpa_supplicant for auto network join
@@ -150,7 +151,7 @@ prepare: ## Create all necessary directories to be used in build
 
 .PHONY: clean
 clean: ## Unmount and delete all temporary mount directories
-	sudo umount $(MNT_DEVICE)p1 || true
-	sudo umount $(MNT_DEVICE)p2 || true
+	sudo umount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)1 || true
+	sudo umount $(MNT_DEVICE)$(MNT_DEVICE_PART_PREFIX)2 || true
 	sudo rm -rf $(MNT_BOOT)
 	sudo rm -rf $(MNT_ROOT)
