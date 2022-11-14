@@ -20,7 +20,7 @@ remote_control_plane() {
     -q \
     -o UserKnownHostsFile=/dev/null \
     -o StrictHostKeyChecking=no \
-    -i "${pi_home}/.ssh/id_ed25519" \
+    -i "${pi_home}/.ssh/id_raspbernetes_ed25519" \
     "pi@${KUBE_MASTER_VIP}" "${@}"
 }
 
@@ -120,8 +120,8 @@ init_master() {
     --ignore-preflight-errors=Mem
 
   weave_version="$(kubectl --kubeconfig=/etc/kubernetes/admin.conf version | base64 | tr -d '\n')"
-  flannel_version="v0.13.0"
-  metallb_version="v0.9.6"
+  flannel_version="v0.18.1"
+  metallb_version="v0.12.1"
 
   # setup network
   if [ "${KUBE_MASTER_NET}" == "weave" ]; then

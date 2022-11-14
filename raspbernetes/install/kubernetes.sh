@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-kube_version="1.20.4-00"
+kube_version="1.24.1-00"
 kube_packages=("kubelet=${kube_version}" "kubectl=${kube_version}" "kubeadm=${kube_version}")
 
 echo "Disabling swap and ensuring it doesn't turn back on after reboot"
@@ -12,7 +12,7 @@ systemctl disable dphys-swapfile.service
 
 # add repo list
 curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-cat << EOF >> /etc/apt/sources.list.d/kubernetes.list
+cat << EOF > /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 

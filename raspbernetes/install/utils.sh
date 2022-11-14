@@ -15,4 +15,6 @@ apt-get install -y --no-install-recommends \
   zip \
   jq \
   git \
-  vim
+  tree \
+  htop \
+  emacs-nox

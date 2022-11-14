@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-keepalived_version="1:2.0.10-1"
+keepalived_version="1:2.1.5-0.2+deb11u1"
 
 echo "Installing keepalived ${keepalived_version}..."
 apt-get install -y --no-install-recommends "keepalived=${keepalived_version}"

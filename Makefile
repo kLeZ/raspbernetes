@@ -34,8 +34,18 @@ WIFI_PASSWORD ?=
 DISTRO_NAME             ?= raspbian_lite
 DISTRO_VERSION          ?= raspbian_lite-2020-02-14
 DISTRO_IMAGE_VERSION    ?= 2020-02-13-raspbian-buster-lite
+DISTRO_IMAGE_EXTENSION  ?= zip
 
-DISTRO_URL				= https://downloads.raspberrypi.org/$(DISTRO_NAME)/images/$(DISTRO_VERSION)/$(DISTRO_IMAGE_VERSION).zip
+DISTRO_URL				= https://downloads.raspberrypi.org/$(DISTRO_NAME)/images/$(DISTRO_VERSION)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION)
+
+ifeq ($(DISTRO_IMAGE_EXTENSION),zip)
+	decompress = unzip
+	decompress_output = -d ./$(OUTPUT_PATH)/
+endif
+ifeq ($(DISTRO_IMAGE_EXTENSION),img.xz)
+	decompress = xz
+	decompress_output = 
+endif
 
 ##@ Build
 .PHONY: build
@@ -56,13 +66,13 @@ build: prepare format install-conf create-conf clean ## Build SD card with Kuber
 
 ##@ Configuration Generation
 .PHONY: install-conf
-install-conf: $(OUTPUT_PATH)/ssh/id_ed25519 mount ## Copy all configurations and scripts to SD card
+install-conf: $(OUTPUT_PATH)/ssh/id_raspbernetes_ed25519 mount ## Copy all configurations and scripts to SD card
 	sudo touch $(MNT_BOOT)/ssh
 	mkdir -p $(RPI_HOME)/bootstrap/
 	cp -r ./raspbernetes/* $(RPI_HOME)/bootstrap/
 	mkdir -p $(RPI_HOME)/.ssh
-	cp ./$(OUTPUT_PATH)/ssh/id_ed25519 $(RPI_HOME)/.ssh/
-	cp ./$(OUTPUT_PATH)/ssh/id_ed25519.pub $(RPI_HOME)/.ssh/authorized_keys
+	cp ./$(OUTPUT_PATH)/ssh/id_raspbernetes_ed25519 $(RPI_HOME)/.ssh/
+	cp ./$(OUTPUT_PATH)/ssh/id_raspbernetes_ed25519.pub $(RPI_HOME)/.ssh/authorized_keys
 	sudo rm -f $(MNT_ROOT)/etc/motd
 
 .PHONY: create-conf
@@ -81,7 +91,7 @@ bootstrap-conf: ## Add node custom configuration file to be sourced on boot
 	echo "export KUBE_MASTER_VIP=$(KUBE_MASTER_VIP)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_MASTER_PRIO=$(KUBE_MASTER_PRIO)" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_NODE_TYPE=$(KUBE_NODE_TYPE)" >> $(RPI_HOME)/bootstrap/rpi-env
-	echo "export KUBE_MASTER_IPS=$(KUBE_MASTER_IPS)" >> $(RPI_HOME)/bootstrap/rpi-env
+	echo "export KUBE_MASTER_IPS=($(KUBE_MASTER_IPS))" >> $(RPI_HOME)/bootstrap/rpi-env
 	echo "export KUBE_MASTER_NET=$(KUBE_MASTER_NET)" >> $(RPI_HOME)/bootstrap/rpi-env
 
 .PHONY: dhcp-conf
@@ -93,8 +103,8 @@ dhcp-conf: ## Add dhcp configuration to set a static IP and gateway
 	echo "static routers=$(RPI_GATEWAY)" | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
 	echo "static domain_name_servers=$(RPI_DNS)" | sudo tee -a $(MNT_ROOT)/etc/dhcpcd.conf >/dev/null
 
-$(OUTPUT_PATH)/ssh/id_ed25519: ## Generate SSH keypair to use in cluster communication
-	ssh-keygen -t ed25519 -b 4096 -C "pi@raspberry" -f ./$(OUTPUT_PATH)/ssh/id_ed25519 -q -N ""
+$(OUTPUT_PATH)/ssh/id_raspbernetes_ed25519: ## Generate SSH keypair to use in cluster communication
+	ssh-keygen -t ed25519 -b 4096 -C "pi@raspberry" -f ./$(OUTPUT_PATH)/ssh/id_raspbernetes_ed25519 -q -N ""
 
 ##@ Download and SD Card management
 .PHONY: format
@@ -124,11 +134,12 @@ wlan0: ## Install wpa_supplicant for auto network join
 eth0: ## Nothing to do for eth0
 
 $(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img: ## Download Raspbian image and extract to current directory
-	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip
+	image_path = ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION)
+	rm -f $(image_path)
 	echo "Downloading $(DISTRO_IMAGE_VERSION).img..."
 	wget $(DISTRO_URL) -P ./$(OUTPUT_PATH)/
-	unzip ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip -d ./$(OUTPUT_PATH)/
-	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).zip
+	$(decompress) $(image_path) $(decompress_output)
+	rm -f $(image_path)
 
 ##@ Misc
 .PHONY: help

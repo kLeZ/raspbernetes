@@ -24,13 +24,13 @@ backend kube-api-be
   default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
 EOF
 
-echo ${KUBE_MASTER_IPS} | awk -F'\n' \
+echo ${KUBE_MASTER_IPS[@]} | awk -F'\n' \
 	'{ \
 		split($1, a, "[[:space:]]"); \
 		for (i in a) { \
 			printf "  server kube-master-%02d %s:6443 check\n", i, a[i] \
 		} \
-	}' >> /etc/haproxy/haproxy.cfg
+	}' | sort >> /etc/haproxy/haproxy.cfg
 
 # reload after new configuration file has been updated
 systemctl reload haproxy
