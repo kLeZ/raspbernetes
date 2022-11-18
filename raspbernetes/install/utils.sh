@@ -17,4 +17,5 @@ apt-get install -y --no-install-recommends \
   git \
   tree \
   htop \
+  vim \
   emacs-nox
