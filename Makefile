@@ -60,9 +60,9 @@ build: prepare format install-conf create-conf clean ## Build SD card with Kuber
 	echo "Kubernetes:"
 	echo "- Node Type: $(KUBE_NODE_TYPE)"
 	echo "- Control Plane Endpoint: $(KUBE_MASTER_VIP)"
-	echo "- Master Priority: $(KUBE_MASTER_PRIO)"
-	echo "- Master IPs: $(KUBE_MASTER_IPS)"
-	echo "- Master Net Provider: $(KUBE_MASTER_NET)"
+	echo "- Control Plane Priority: $(KUBE_MASTER_PRIO)"
+	echo "- Control Plane IPs: $(KUBE_MASTER_IPS)"
+	echo "- Control Plane Net Provider: $(KUBE_MASTER_NET)"
 
 ##@ Configuration Generation
 .PHONY: install-conf
