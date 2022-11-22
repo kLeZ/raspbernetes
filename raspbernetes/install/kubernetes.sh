@@ -24,8 +24,8 @@ until apt-get update; do echo "Retrying to update apt mirrors"; done
 apt-get install -y --no-install-recommends "${kube_packages[@]}"
 apt-mark hold "${kube_packages[@]}"
 
-# pull down master images for faster build time in background
-if [ "${KUBE_NODE_TYPE}" == "master" ]; then
+# pull down controlplane images for faster build time in background
+if [ "${KUBE_NODE_TYPE}" == "controlplane" ]; then
   echo "Pulling down all kubeadm images..."
   kubeadm config images pull &
 fi

@@ -16,7 +16,7 @@ used to build the SD cards:
 - `bash` - 4.0+
 - `make` - 4.1+
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - 1.20.4
-- 4 Raspberry Pis (3 Masters and 1 Worker)
+- 4 Raspberry Pis (3 Controlplanes and 1 Worker)
 
 ## Applications
 
@@ -45,7 +45,7 @@ A short explanation of each environment variable that can be overridden.
 #### Raspberry Pi network and hostname configuration:
 
 - `RPI_NETWORK_TYPE` - Network option of choice. Either `eth0` or `wlan0`. (default: `wlan0`)
-- `RPI_HOSTNAME` - Hostname for specific Raspberry Pi. (default: `rpi-kube-master-01`)
+- `RPI_HOSTNAME` - Hostname for specific Raspberry Pi. (default: `rpi-kube-controlplane-01`)
 - `RPI_IP` - Static IP to set. (default: `192.168.1.101`)
 - `RPI_GATEWAY` - Generally your router ip. (default: `192.168.1.1`)
 - `RPI_DNS` - Usually the same as your router unless you run a separate DNS (default: `RPI_GATEWAY`)
@@ -53,11 +53,11 @@ A short explanation of each environment variable that can be overridden.
 
 #### Kubernetes specific configuration:
 
-- `KUBE_NODE_TYPE` - Type of Kubernetes node. Either `master` or `worker`. (default: `master`)
+- `KUBE_NODE_TYPE` - Type of Kubernetes node. Either `controlplane` or `worker`. (default: `controlplane`)
 - `KUBE_MASTER_VIP` - Floating virtual IP (VIP) to use in `keepalived`. (default: `192.168.1.100`)
-- `KUBE_MASTER_IP_01` - IP of 1st master node to use in `haproxy`. (default: `192.168.1.101`)
-- `KUBE_MASTER_IP_02` - IP of 2nd master node to use in `haproxy`. (default: `192.168.1.102`)
-- `KUBE_MASTER_IP_03` - IP of 3rd master node to use in `haproxy`. (default: `192.168.1.103`)
+- `KUBE_MASTER_IP_01` - IP of 1st controlplane node to use in `haproxy`. (default: `192.168.1.101`)
+- `KUBE_MASTER_IP_02` - IP of 2nd controlplane node to use in `haproxy`. (default: `192.168.1.102`)
+- `KUBE_MASTER_IP_03` - IP of 3rd controlplane node to use in `haproxy`. (default: `192.168.1.103`)
 
 #### Network configuration if using Wifi. Accompanied with `RPI_NETWORK_TYPE` of `wlan0`:
 

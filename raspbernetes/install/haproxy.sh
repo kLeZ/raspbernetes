@@ -5,7 +5,7 @@ echo "Installing haproxy..."
 apt-get install -y --no-install-recommends "haproxy"
 apt-mark hold haproxy
 
-# create a configuration file for all other master hosts
+# create a configuration file for all other controlplane hosts
 cat << EOF >> /etc/haproxy/haproxy.cfg
 
 frontend kube-api
@@ -28,7 +28,7 @@ echo ${KUBE_MASTER_IPS[@]} | awk -F'\n' \
 	'{ \
 		split($1, a, "[[:space:]]"); \
 		for (i in a) { \
-			printf "  server kube-master-%02d %s:6443 check\n", i, a[i] \
+			printf "  server kube-controlplane-%02d %s:6443 check\n", i, a[i] \
 		} \
 	}' | sort >> /etc/haproxy/haproxy.cfg
 

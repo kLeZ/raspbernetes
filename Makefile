@@ -13,14 +13,14 @@ OUTPUT_PATH = output
 
 # Raspberry PI host and IP configuration
 RPI_NETWORK_TYPE ?= wlan0
-RPI_HOSTNAME     ?= rpi-kube-master-01
+RPI_HOSTNAME     ?= rpi-kube-controlplane-01
 RPI_IP           ?= 192.168.1.101
 RPI_GATEWAY      ?= 192.168.1.1
 RPI_DNS          ?= $(RPI_GATEWAY)
 RPI_TIMEZONE     ?= Australia/Melbourne
 
 # Kubernetes configuration
-KUBE_NODE_TYPE    ?= master
+KUBE_NODE_TYPE    ?= controlplane
 KUBE_MASTER_VIP   ?= 192.168.1.100
 KUBE_MASTER_IPS   ?= 192.168.1.101
 KUBE_MASTER_PRIO  ?= 50

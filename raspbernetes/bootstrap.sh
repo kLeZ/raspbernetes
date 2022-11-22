@@ -20,8 +20,8 @@ sleep 30
 ./install/docker.sh
 ./install/kubernetes.sh
 
-# only install some components on master nodes
-if [ "${KUBE_NODE_TYPE}" == "master" ]; then
+# only install some components on controlplane nodes
+if [ "${KUBE_NODE_TYPE}" == "controlplane" ]; then
   ./install/keepalived.sh
   ./install/haproxy.sh
 fi

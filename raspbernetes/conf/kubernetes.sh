@@ -29,7 +29,7 @@ clean_node() {
     echo "Deleting ${HOSTNAME} node from kubernetes cluster"
     remote_control_plane kubectl delete node "${HOSTNAME}"
 
-    if [ "${KUBE_NODE_TYPE}" == "master" ]; then
+    if [ "${KUBE_NODE_TYPE}" == "controlplane" ]; then
       reset_master
     fi
   fi
@@ -53,7 +53,7 @@ cluster_up() {
 }
 
 reset_master() {
-  echo "Removing master ${HOSTNAME} from existing etcd cluster"
+  echo "Removing controlplane ${HOSTNAME} from existing etcd cluster"
   etcdctl_member=$(etcdctl_cmd member list | grep "${HOSTNAME}" | cut -d ':' -f1)
   etcdctl_cmd member remove "${etcdctl_member}"
 
@@ -76,7 +76,7 @@ get_certs() {
       --certificate-key "${certificate_key}"
 
     # attempt to download certs, need to retry incase of race condition
-    # with other masters clobbering the certificate_key secret
+    # with other controlplanes clobbering the certificate_key secret
     kubeadm join phase control-plane-prepare download-certs "${token_cert_hash[@]}" \
       --certificate-key "${certificate_key}" \
       --control-plane || continue
@@ -96,7 +96,7 @@ get_config() {
 
 join_master() {
   if curl -sSLk "https://${KUBE_MASTER_VIP}:6443" -o /dev/null; then
-    echo "Control-plane has been found! Joining existing cluster as master."
+    echo "Control-plane has been found! Joining existing cluster as controlplane."
     existing_master
   elif hostname -I | grep "${KUBE_MASTER_VIP}"; then
     echo "VIP currently resides on local host and no cluster exists."
@@ -143,11 +143,11 @@ existing_master() {
   # ensure the cluster is given enough time to initialise
   cluster_up
 
-  # get kubeadm join command and download certs from master
+  # get kubeadm join command and download certs from controlplane
   join_command=$(remote_control_plane kubeadm token create --print-join-command)
   get_certs "${join_command}"
 
-  # join cluster as master
+  # join cluster as controlplane
   ${join_command} --control-plane
 }
 
@@ -155,14 +155,14 @@ join_worker() {
   # ensure the cluster is given enough time to initialise
   cluster_up
 
-  # get kubeadm join command from master
+  # get kubeadm join command from controlplane
   join_command=$(remote_control_plane kubeadm token create --print-join-command)
   ${join_command}
 }
 
 # determine the node type and run specific function
-if [ "${KUBE_NODE_TYPE}" == "master" ]; then
-  echo "Detected as master node type, need to either join existing cluster or initialise new one"
+if [ "${KUBE_NODE_TYPE}" == "controlplane" ]; then
+  echo "Detected as controlplane node type, need to either join existing cluster or initialise new one"
   join_master
 elif [ "${KUBE_NODE_TYPE}" == "worker" ]; then
   echo "Detected as worker node type, need to join existing cluster!"
