@@ -43,7 +43,7 @@ ifeq ($(DISTRO_IMAGE_EXTENSION),zip)
 	decompress_output = -d ./$(OUTPUT_PATH)/
 endif
 ifeq ($(DISTRO_IMAGE_EXTENSION),img.xz)
-	decompress = xz
+	decompress = xz -d
 	decompress_output = 
 endif
 
@@ -134,12 +134,11 @@ wlan0: ## Install wpa_supplicant for auto network join
 eth0: ## Nothing to do for eth0
 
 $(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).img: ## Download Raspbian image and extract to current directory
-	image_path = ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION)
-	rm -f $(image_path)
+	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION)
 	echo "Downloading $(DISTRO_IMAGE_VERSION).img..."
 	wget $(DISTRO_URL) -P ./$(OUTPUT_PATH)/
-	$(decompress) $(image_path) $(decompress_output)
-	rm -f $(image_path)
+	$(decompress) ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION) $(decompress_output)
+	rm -f ./$(OUTPUT_PATH)/$(DISTRO_IMAGE_VERSION).$(DISTRO_IMAGE_EXTENSION)
 
 ##@ Misc
 .PHONY: help
